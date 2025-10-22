@@ -14,41 +14,61 @@
             padding: 25px;
             background-color: #2a2a2a;
         }
-
         
-        #demo-canvas {
-        width:  800px;
-        height: 800px;
+        
+        #demo-canvas 
+        {
+            width:  1400px;
+            height: 1400px;
 
-        /*
-         * WebGL trick: pick an offensive canvas background color to test
-         *  opacity/clearing bugs
-         */
-        background-color: #da6052;
+            /*
+             * WebGL trick: pick an offensive canvas background color to test
+             *  opacity/clearing bugs
+             */
+            background-color: #da6052;
+            /* Help to illustrate the rasterizer's job: when artificially lowering resolution, show pixelated image */
+            image-rendering: crisp-edges;
+              
+        }
 
-        /* Help to illustrate the rasterizer's job: when artificially lowering resolution, show pixelated image */
-        image-rendering: crisp-edges;
-      }
+       #canvas-explanation {
+            color: #eee;
+            font-weight: 500;
+            font-size: 50pt;
+            border: 1px solid white;
+            padding: 25px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+        }
 
        /** CSS to make a nice little error box output for debugging (nice if you can't use devtools, e.g. mobile)  */
-      #error-box {
-        color: #fd8080;
-        font-weight: 500;
-        font-size: 18pt;
-        border: 1px solid white;
-        padding: 25px;
-        margin-top: 20px;
-      }
+       #error-box 
+       {
+            color: #fd8080;
+            font-weight: 500;
+            font-size: 18pt;
+            border: 1px solid white;
+            padding: 25px;
+            margin-top: 20px;
+       }
 
-      .error-box-title {
-        color: #eee;
-        border-bottom: 1px solid gray;
+      .error-box-title 
+      {
+            color: #eee;
+            border-bottom: 1px solid gray;
       }
     </style>
 
 
     <body>
-        <p></p>
+        <div id="canvas-explanation">
+            <p>I rendered this on YOUR GPU!</p>
+            <p>WOW check  out this Triangle</p>
+        </div>
+        
         <canvas id="demo-canvas"></canvas>
         <div id="error-box">
             <span class="error-box-title">Error messages, if any, go in here.</span>
