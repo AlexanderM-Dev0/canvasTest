@@ -14,18 +14,17 @@ function helloTriangle()
 
     const gl = canvas.getContext('webgl2');
 
-   
-
     const triangleVertices = 
     [
-        0.0, 0.5,
+        //x, y, z,    r, g, b
+        0.0, 0.5, 0.0,   1.0, 0.0, 0.0,
         
-        -0.5, -0.5,
+        -0.5, -0.5, 0.0, 0.0, 1.0, 0.0,
 
-        0.5, -0.5
+        0.5, -0.5, 0.0,  0.0, 0.0, 1.0,
     ];
-    const traingleVerticesCpuBuffer = new Float32Array(triangleVertices);
 
+    const traingleVerticesCpuBuffer = new Float32Array(triangleVertices);
     const triangleGeoBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleGeoBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, traingleVerticesCpuBuffer, gl.STATIC_DRAW);
@@ -33,11 +32,22 @@ function helloTriangle()
     const vertexShaderSourceCode = `#version 300 es
     precision mediump float;
 
-    in vec2 vertexPosition;
+    in vec3 vertexPosition;
+
+    in vec3 vertexColor;
+
+    out vec3 fragmentColor;
+
+    uniform float uScale;
+    uniform vec3 uOffset;
 
     void main()
     {
-        gl_Position = vec4(vertexPosition.x, vertexPosition.y, 0.0, 1.0);
+        vec3 scaledPosition = uScale * vertexPosition;
+        vec3 offsetPosition = scaledPosition + uOffset;
+
+        gl_Position = vec4(offsetPosition, 1.0);
+        fragmentColor =  vertexColor;
     }`;
     
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -53,10 +63,12 @@ function helloTriangle()
     const fragmentShaderSourceCode = `#version 300 es
     precision mediump float;
 
+    in vec3 fragmentColor;
+
     out vec4 outputColor;
 
     void main() {
-        outputColor = vec4(0.294, 0.0, 0.51, 1.0);
+        outputColor = vec4(fragmentColor, 1.0);
     }`;
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -68,9 +80,10 @@ function helloTriangle()
         showError(`Failed to compile fragmentShader shader: ${errorMessage}`);
         return;
     }
-
+    
 
     const triangleShaderProgram = gl.createProgram();
+    
     gl.attachShader(triangleShaderProgram, vertexShader);
     gl.attachShader(triangleShaderProgram, fragmentShader);
     gl.linkProgram(triangleShaderProgram);
@@ -81,6 +94,8 @@ function helloTriangle()
         return;
   }
   
+    
+
   const vertexPositionAttribLocation = gl.getAttribLocation(triangleShaderProgram, 'vertexPosition');
   if (vertexPositionAttribLocation < 0) {
     showError(`Failed to get attribute location for vertexPosition`);
@@ -98,6 +113,13 @@ function helloTriangle()
 
   //Set GPU Program
   gl.useProgram(triangleShaderProgram);
+
+  const uScaleLocation = gl.getUniformLocation(triangleShaderProgram, "uScale");
+  const uOffsetLocation = gl.getUniformLocation(triangleShaderProgram, "uOffset");
+
+  gl.uniform1f(uScaleLocation, 1.0);
+  gl.uniform2f(uOffsetLocation, 0.0, 0.0, 0.0);
+  
   gl.enableVertexAttribArray(vertexPositionAttribLocation);
 
   // Input Assembler
@@ -106,21 +128,35 @@ function helloTriangle()
     /* index: which attribute to use */
      vertexPositionAttribLocation,
      /* size: how many components in that attribute*/ 
-     2,
+     3,
      /* type: what is the type in the buffer itself */
      gl.FLOAT, 
      /* Normalized: determines the conversion between ints and floats*/
      false,
      /* stride: how many bytes to move foward in the buffer to find the same attribute for the next vertex */
-     2 * Float32Array.BYTES_PER_ELEMENT,
+     6 * Float32Array.BYTES_PER_ELEMENT,
      /* offset: how many bytes should the input assembler skip into the buffer when reading attribs*/
      0
   );
+  const vertexColorAttribLocation = gl.getAttribLocation(triangleShaderProgram, 'vertexColor');
+  gl.enableVertexAttribArray(vertexColorAttribLocation);
+  gl.vertexAttribPointer(
+    vertexColorAttribLocation,
+    3,
+    gl.FLOAT,
+    false,
+    6 * Float32Array.BYTES_PER_ELEMENT,
+    3 * Float32Array.BYTES_PER_ELEMENT
+  );
+
   
+
   // Draw Call
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 
 }
+
+
 
 try {
   helloTriangle();
