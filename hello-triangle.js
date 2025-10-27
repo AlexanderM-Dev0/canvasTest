@@ -7,12 +7,31 @@ function showError(errorText) {
   console.error(errorText);
 }
 
+class vao  
+{ 
+  constructor(gl, newVertextArray, new_name)
+  {
+    //passed variables
+    this.name = new_name;
+    this.context = gl;
+    this.vertexArray = newVertextArray;
+
+    //calculated variables
+    this.length = this.vertexArray.length;
+  }
+}
+
+
+
+
 function helloTriangle() 
 {
     /** @type {HTMLCanvasElement} */
     const canvas = document.getElementById('demo-canvas');
 
     const gl = canvas.getContext('webgl2');
+
+    const vao_array = []; 
 
     const triangleVertices = 
     [
@@ -22,7 +41,15 @@ function helloTriangle()
         -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 
 
         0.5, -0.5, 0.0,  0.0, 0.0, 1.0,
+        0.7, -0.5, 0.0,  0.0, 0.0, 1.0,
     ];
+
+
+    vao_array.push(new vao(gl, triangleVertices, "triangle_vao"));
+
+  
+
+
 
     const traingleVerticesCpuBuffer = new Float32Array(triangleVertices);
     const triangleGeoBuffer = gl.createBuffer();
@@ -54,12 +81,6 @@ function helloTriangle()
     gl.shaderSource(vertexShader, vertexShaderSourceCode);
     gl.compileShader(vertexShader);
 
-    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-        const errorMessage = gl.getShaderInfoLog(vertexShader);
-        showError(`Failed to compile vertex shader: ${errorMessage}`);
-        return;
-    }
-
     const fragmentShaderSourceCode = `#version 300 es
     precision mediump float;
 
@@ -74,12 +95,6 @@ function helloTriangle()
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderSourceCode);
     gl.compileShader(fragmentShader);
-
-    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-        const errorMessage = gl.getShaderInfoLog(fragmentShader);
-        showError(`Failed to compile fragmentShader shader: ${errorMessage}`);
-        return;
-    }
     
 
     const triangleShaderProgram = gl.createProgram();
@@ -87,20 +102,12 @@ function helloTriangle()
     gl.attachShader(triangleShaderProgram, vertexShader);
     gl.attachShader(triangleShaderProgram, fragmentShader);
     gl.linkProgram(triangleShaderProgram);
-
-    if (!gl.getProgramParameter(triangleShaderProgram, gl.LINK_STATUS)) {
-        const errorMessage = gl.getProgramInfoLog(triangleShaderProgram);
-        showError(`Failed to link GPU program: ${errorMessage}`);
-        return;
-  }
   
-    
+  
+
 
   const vertexPositionAttribLocation = gl.getAttribLocation(triangleShaderProgram, 'vertexPosition');
-  if (vertexPositionAttribLocation < 0) {
-    showError(`Failed to get attribute location for vertexPosition`);
-    return;
-  }
+
 
   //Output Merger
   canvas.width = canvas.clientWidth;        //Must be above the clear
@@ -117,8 +124,8 @@ function helloTriangle()
   const uScaleLocation = gl.getUniformLocation(triangleShaderProgram, "uScale");
   const uOffsetLocation = gl.getUniformLocation(triangleShaderProgram, "uOffset");
 
-  gl.uniform1f(uScaleLocation, 1.0);
-  gl.uniform2f(uOffsetLocation, 0.0, 0.0, 0.0);
+  gl.uniform1f(uScaleLocation, 1);
+  gl.uniform3f(uOffsetLocation, 0.0, 0.0, 0.0);
   
   gl.enableVertexAttribArray(vertexPositionAttribLocation);
 
@@ -148,8 +155,6 @@ function helloTriangle()
     6 * Float32Array.BYTES_PER_ELEMENT,
     3 * Float32Array.BYTES_PER_ELEMENT
   );
-
-  
 
   // Draw Call
   gl.drawArrays(gl.TRIANGLES, 0, 3);
