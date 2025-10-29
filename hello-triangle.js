@@ -23,6 +23,17 @@ class vao
   }
 }
 
+function makeZRotationMatrix(angleInRadians) {
+  const c = Math.cos(angleInRadians);
+  const s = Math.sin(angleInRadians);
+  return new Float32Array([
+    c, -s, 0,
+    s,  c, 0,
+    0,  0, 1
+  ]);
+}
+
+
 function helloTriangle() 
 {
     /** @type {HTMLCanvasElement} */
@@ -50,12 +61,25 @@ function helloTriangle()
 
         0.5, -0.5, 0.0,  1.0, 0.0, 0.0,
     ];
+    const squareVertices =
+    [
+        // First triangle
+  -0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   // top-left
+  -0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   // bottom-left
+   0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   // bottom-right
+
+  // Second triangle
+  -0.5,  0.5, 0.0,   1.0, 0.0, 0.0,   // top-left
+   0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   // bottom-right
+   0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   // top-right
+      ]
 
 
-    vao_array.push(new vao(gl, triangleVertices, "triangle_vao", 0.3, [0.0, 0.0, 0.0]));
-    vao_array.push(new vao(gl, triangle2Vertices, "triangle2_vao", 0.5, [0.3, 0.0, 0.0]));
-    vao_array.push(new vao(gl, triangle2Vertices, "triangle2_vao", 0.5, [-0.3, 0.5, 0.0]));
+    vao_array.push(new vao(gl.TRIANGLES, squareVertices, "square_vao", 1, [0.0, -0.0, 0.0]));
 
+    vao_array.push(new vao(gl.TRIANGLES, triangleVertices, "triangle_vao", 0.3, [0.0, 0.0, 0.0]));
+    vao_array.push(new vao(gl.TRIANGLES, triangle2Vertices, "triangle2_vao", 0.5, [0.3, 0.0, 0.0]));
+    vao_array.push(new vao(gl.TRIANGLES, triangle2Vertices, "triangle2_vao", 0.5, [-0.3, 0.5, 0.0]));
 
     const vertexShaderSourceCode = `#version 300 es
     precision mediump float;
@@ -163,7 +187,7 @@ function helloTriangle()
         3 * Float32Array.BYTES_PER_ELEMENT
       );
       // Draw Call
-      gl.drawArrays(gl.TRIANGLES, 0, vao_array[i].length / 6);
+      gl.drawArrays(vao_array[i].context, 0, vao_array[i].length / 6);
     }
 }
 
